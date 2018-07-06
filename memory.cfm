@@ -25,30 +25,40 @@
 <cfset percentUsed = round( (memoryInUse / currentHeapSize) * 100 )>
 <cfset percentFree = round( (freeAllocatedMemory / currentHeapSize) * 100 )>
 <cfset percentAllocated = round( (currentHeapSize / maxHeapSize) * 100 )>
-
+<cfset memIter = createObject("java","java.lang.management.ManagementFactory").getMemoryPoolMXBeans().iterator()>
 <div class="container">
 	<cfoutput>
 		<h1>JVM Memory Metrics</h1>
 		<div class="jumbotron">
 		<div class="row">
-			<div class="col-sm-3 text-right">Memory Usage:</div> 
+			<div class="col-sm-3 text-right">Memory Usage:</div>
 			<div class="col-sm-9"><strong>#round(memoryInUse)#mb #percentUsed#%</strong> <small class="text-muted">of heap memory is in use</small></div>
 		</div>
 		<div class="row">
-			<div class="col-sm-3 text-right">Free Allocated Memory:</div> 
+			<div class="col-sm-3 text-right">Free Allocated Memory:</div>
 			<div class="col-sm-9"><strong>#round(freeAllocatedMemory)#mb #percentFree#%</strong> <small class="text-muted">of heap memory is allocated but not in use</small></div>
 		</div>
 		<div class="row">
-			<div class="col-sm-3 text-right">Current Heap Size:</div> 
+			<div class="col-sm-3 text-right">Current Heap Size:</div>
 			<div class="col-sm-9"><strong>#round(currentHeapSize)#mb #percentAllocated#%</strong> <small class="text-muted">of heap memory is allocated</small></div>
 		</div>
 
 		<div class="row">
-			<div class="col-sm-3 text-right">Max Heap Size:</div> 
+			<div class="col-sm-3 text-right">Max Heap Size:</div>
 			<div class="col-sm-9"><strong>#round(maxHeapSize)#mb</strong> <small class="text-muted">is the maximum amount of memory that <cfif structKeyExists(server, "lucee")>Lucee<cfelse>ColdFusion</cfif> can use. </small></div>
 		</div>
+	<cfloop collection="#memIter#" item="item">
+		<cfscript>
+			name = item.getName();
+			type = item.getType().toString();
+			used = item.getUsage().getUsed()/1024/1024;
+			max = item.getUsage().getMax()/1024/1024;
+		</cfscript>
+		<div class="row">
+			<div class="col-sm-3 text-right">#name# (#type#):</div>
+			<div class="col-sm-9"><strong>#round(used)#MB / #round(max)#MB</strong></div>
 		</div>
-	
+	</cfloop>
 
 		<h2>Current Heap Memory Usage</h2>
 		<div class="progress">
